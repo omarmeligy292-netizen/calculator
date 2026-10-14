@@ -1,117 +1,143 @@
 import streamlit as st
+import streamlit.components.v1 as components
 
 # إعدادات الصفحة
 st.set_page_config(page_title="آلة حاسبة مظلمة", layout="centered")
 
-# كود CSS مكثف وصارم لإجبار الأزرار والصفوف على الاندماج وتطابق أبعاد الصورة
-st.markdown("""
+# دمج التصميم المظلم والمربعات المتقاربة تماماً كالصورة الأصلية داخل حاوية HTML صلبة
+calculator_html = """
+<!DOCTYPE html>
+<html>
+<head>
     <style>
-    /* تغيير خلفية التطبيق الإجمالية */
-    .stApp {
-        background-color: #0b0f17;
-    }
-    
-    /* تحديد عرض الحاوية بالكامل لتبدو كآلة حاسبة ملمومة */
-    [data-testid="stMainBlockContainer"] {
-        max-width: 400px !important;
-        padding-top: 5rem !important;
-        margin: auto !important;
-    }
-    
-    /* شاشة العرض العليا */
-    .calc-display {
-        background-color: #0b0f17;
-        color: #ffffff;
-        font-size: 3rem;
-        text-align: right;
-        padding: 20px 15px;
-        border-radius: 8px;
-        border: 1px solid #1f242c;
-        margin-bottom: 10px;
-        font-family: 'Segoe UI', sans-serif;
-    }
-    
-    /* تصفير المسافات تماماً بين الصفوف البرمجية */
-    [data-testid="stVerticalBlock"] {
-        gap: 0px !important;
-    }
-    
-    /* تصفير المسافات تماماً بين الأعمدة في الصف الواحد */
-    [data-testid="stHorizontalBlock"] {
-        gap: 8px !important;
-        margin-bottom: 8px !important;
-    }
-    
-    /* تصفير الحشو الخاص بكل عمود */
-    [data-testid="column"] {
-        padding: 0px !important;
-        width: 100% !important;
-    }
-    
-    /* تحويل الأزرار إلى مربعات عريضة وممتلئة */
-    div.stButton > button {
-        background-color: #161b22 !important;
-        color: #ffffff !important;
-        border: none !important;
-        font-size: 1.5rem !important;
-        font-weight: 600 !important;
-        height: 75px !important;  /* تحديد طول ثابت ومناسب للزر */
-        width: 100% !important;   /* إجبار الزر على ملء كامل عرض العمود */
-        border-radius: 8px !important;
-        margin: 0px !important;
-        padding: 0px !important;
-        transition: background-color 0.1s ease;
-    }
-    
-    /* تأثير تمرير الفأرة والضغط */
-    div.stButton > button:hover {
-        background-color: #21262d !important;
-        border: none !important;
-        color: #ffffff !important;
-    }
-    div.stButton > button:active {
-        background-color: #30363d !important;
-    }
+        body {
+            background-color: #0b0f17;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 90vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .calculator {
+            background-color: #161b22;
+            padding: 20px;
+            border-radius: 12px;
+            width: 340px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid #21262d;
+        }
+        .display {
+            background-color: #0b0f17;
+            color: #ffffff;
+            font-size: 2.5rem;
+            text-align: right;
+            padding: 20px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            min-height: 50px;
+            word-wrap: break-word;
+            word-break: break-all;
+            border: 1px solid #21262d;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .btn {
+            background-color: #21262d;
+            color: #ffffff;
+            border: none;
+            font-size: 1.3rem;
+            font-weight: 600;
+            height: 70px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn:hover {
+            background-color: #30363d;
+        }
+        .btn:active {
+            background-color: #3f4650;
+        }
     </style>
-""", unsafe_allow_html=True)
+</head>
+<body>
 
-# إدارة حالة التطبيق (Session State) لتخزين النص الحالي
-if "expression" not in st.session_state:
-    st.session_state.expression = ""
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button class="btn" onclick="clearDisplay()">AC</button>
+            <button class="btn" onclick="append('(')">(</button>
+            <button class="btn" onclick="append('%')">%</button>
+            <button class="btn" onclick="append('/')">÷</button>
 
-def press(char):
-    st.session_state.expression += str(char)
+            <button class="btn" onclick="append('7')">7</button>
+            <button class="btn" onclick="append('8')">8</button>
+            <button class="btn" onclick="append('9')">9</button>
+            <button class="btn" onclick="append('*')">×</button>
 
-def clear():
-    st.session_state.expression = ""
+            <button class="btn" onclick="append('4')">4</button>
+            <button class="btn" onclick="append('5')">5</button>
+            <button class="btn" onclick="append('6')">6</button>
+            <button class="btn" onclick="append('-')">-</button>
 
-def backspace():
-    st.session_state.expression = st.session_state.expression[:-1]
+            <button class="btn" onclick="append('1')">1</button>
+            <button class="btn" onclick="append('2')">2</button>
+            <button class="btn" onclick="append('3')">3</button>
+            <button class="btn" onclick="append('+')">+</button>
 
-def calculate():
-    try:
-        expr = st.session_state.expression.replace('×', '*').replace('÷', '/')
-        if expr:
-            st.session_state.expression = str(eval(expr))
-    except:
-        st.session_state.expression = "Error"
+            <button class="btn" onclick="append('0')">0</button>
+            <button class="btn" onclick="append('.')">.</button>
+            <button class="btn" onclick="backspace()">⌫</button>
+            <button class="btn" onclick="calculate()">=</button>
+        </div>
+    </div>
 
-# عرض الشاشة (إذا كانت فارغة تعرض 0)
-display_text = st.session_state.expression if st.session_state.expression else "0"
-st.markdown(f'<div class="calc-display">{display_text}</div>', unsafe_allow_html=True)
+    <script>
+        let currentInput = "";
+        const display = document.getElementById("display");
 
-# مصفوفة الأزرار والرموز
-buttons = [
-    [("AC", clear), ("(", lambda: press("(")), ("%", lambda: press("%")), ("÷", lambda: press("/"))],
-    [("7", lambda: press("7")), ("8", lambda: press("8")), ("9", lambda: press("9")), ("×", lambda: press("*"))],
-    [("4", lambda: press("4")), ("5", lambda: press("5")), ("6", lambda: press("6")), ("-", lambda: press("-"))],
-    [("1", lambda: press("1")), ("2", lambda: press("2")), ("3", lambda: press("3")), ("+", lambda: press("+"))],
-    [("0", lambda: press("0")), (".", lambda: press(".")), ("⌫", backspace), ("=", calculate)]
-]
+        function updateDisplay(text) {
+            let formatted = text.replace(/\\*/g, '×').replace(/\\//g, '÷');
+            display.innerText = formatted || "0";
+        }
 
-# رسم الأزرار
-for row_idx, row in enumerate(buttons):
-    cols = st.columns(4)
-    for col_idx, (label, action) in enumerate(row):
-        with cols[col_idx]:
-            st.button(label, key=f"btn_r{row_idx}_c{col_idx}", on_click=action)
+        function append(value) {
+            currentInput += value;
+            updateDisplay(currentInput);
+        }
+
+        function clearDisplay() {
+            currentInput = "";
+            updateDisplay("0");
+        }
+
+        function backspace() {
+            currentInput = currentInput.slice(0, -1);
+            updateDisplay(currentInput);
+        }
+
+        function calculate() {
+            try {
+                if (!currentInput) return;
+                let result = eval(currentInput);
+                currentInput = result.toString();
+                updateDisplay(currentInput);
+            } catch (e) {
+                display.innerText = "Error";
+                currentInput = "";
+            }
+        }
+    </script>
+</body>
+</html>
+"""
+
+# عرض الحاوية بداخل Streamlit بأبعاد ثابتة ومحكومة تمنع التمدد العشوائي
+components.html(calculator_html, height=550, scrolling=False)
