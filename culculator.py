@@ -3,12 +3,19 @@ import streamlit as st
 # إعدادات الصفحة
 st.set_page_config(page_title="آلة حاسبة مظلمة", layout="centered")
 
-# كود CSS المطور لجعل الأزرار مربعة ومتقاربة تماماً مثل الصورة الأصلية
+# كود CSS مكثف وصارم لإجبار الأزرار والصفوف على الاندماج وتطابق أبعاد الصورة
 st.markdown("""
     <style>
-    /* تغيير خلفية التطبيق */
+    /* تغيير خلفية التطبيق الإجمالية */
     .stApp {
         background-color: #0b0f17;
+    }
+    
+    /* تحديد عرض الحاوية بالكامل لتبدو كآلة حاسبة ملمومة */
+    [data-testid="stMainBlockContainer"] {
+        max-width: 400px !important;
+        padding-top: 5rem !important;
+        margin: auto !important;
     }
     
     /* شاشة العرض العليا */
@@ -17,39 +24,50 @@ st.markdown("""
         color: #ffffff;
         font-size: 3rem;
         text-align: right;
-        padding: 25px 20px;
-        border-radius: 12px;
+        padding: 20px 15px;
+        border-radius: 8px;
         border: 1px solid #1f242c;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
         font-family: 'Segoe UI', sans-serif;
     }
     
-    /* تقليل المسافات العمودية والأفقية بين أعمدة Streamlit ومحاذاتها */
-    [data-testid="column"] {
-        padding: 0px 4px !important;
+    /* تصفير المسافات تماماً بين الصفوف البرمجية */
+    [data-testid="stVerticalBlock"] {
+        gap: 0px !important;
     }
     
-    /* تنسيق الأزرار لجعلها عريضة ومطابقة تماماً للصورة */
+    /* تصفير المسافات تماماً بين الأعمدة في الصف الواحد */
+    [data-testid="stHorizontalBlock"] {
+        gap: 8px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    /* تصفير الحشو الخاص بكل عمود */
+    [data-testid="column"] {
+        padding: 0px !important;
+        width: 100% !important;
+    }
+    
+    /* تحويل الأزرار إلى مربعات عريضة وممتلئة */
     div.stButton > button {
         background-color: #161b22 !important;
         color: #ffffff !important;
         border: none !important;
-        font-size: 1.4rem !important;
+        font-size: 1.5rem !important;
         font-weight: 600 !important;
-        height: 70px !important; /* طول الزر */
-        width: 100% !important;   /* عرض الزر ليملاً العمود */
+        height: 75px !important;  /* تحديد طول ثابت ومناسب للزر */
+        width: 100% !important;   /* إجبار الزر على ملء كامل عرض العمود */
         border-radius: 8px !important;
-        margin: 4px 0px !important;
-        transition: background-color 0.15s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        margin: 0px !important;
+        padding: 0px !important;
+        transition: background-color 0.1s ease;
     }
     
     /* تأثير تمرير الفأرة والضغط */
     div.stButton > button:hover {
         background-color: #21262d !important;
         border: none !important;
+        color: #ffffff !important;
     }
     div.stButton > button:active {
         background-color: #30363d !important;
@@ -82,7 +100,7 @@ def calculate():
 display_text = st.session_state.expression if st.session_state.expression else "0"
 st.markdown(f'<div class="calc-display">{display_text}</div>', unsafe_allow_html=True)
 
-# مصفوفة الأزرار والرموز بنفس الترتيب المطلوب
+# مصفوفة الأزرار والرموز
 buttons = [
     [("AC", clear), ("(", lambda: press("(")), ("%", lambda: press("%")), ("÷", lambda: press("/"))],
     [("7", lambda: press("7")), ("8", lambda: press("8")), ("9", lambda: press("9")), ("×", lambda: press("*"))],
@@ -91,7 +109,7 @@ buttons = [
     [("0", lambda: press("0")), (".", lambda: press(".")), ("⌫", backspace), ("=", calculate)]
 ]
 
-# رسم شبكة الأزرار المتقاربة لحل مشكلة التباعد الطولي
+# رسم الأزرار
 for row_idx, row in enumerate(buttons):
     cols = st.columns(4)
     for col_idx, (label, action) in enumerate(row):
