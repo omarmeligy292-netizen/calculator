@@ -4,7 +4,7 @@ import streamlit.components.v1 as components
 # إعدادات الصفحة
 st.set_page_config(page_title="آلة حاسبة مظلمة", layout="centered")
 
-# دمج التصميم المظلم والمربعات المتقاربة تماماً كالصورة الأصلية داخل حاوية HTML صلبة
+# كود واجهة الآلة الحاسبة مع معالجة ذكية للأقواس في زر واحد
 calculator_html = """
 <!DOCTYPE html>
 <html>
@@ -73,7 +73,7 @@ calculator_html = """
         <div class="display" id="display">0</div>
         <div class="buttons">
             <button class="btn" onclick="clearDisplay()">AC</button>
-            <button class="btn" onclick="append('(')">(</button>
+            <button class="btn" onclick="smartParenthesis()">()</button>
             <button class="btn" onclick="append('%')">%</button>
             <button class="btn" onclick="append('/')">÷</button>
 
@@ -113,6 +113,20 @@ calculator_html = """
             updateDisplay(currentInput);
         }
 
+        // دالة ذكية لتحديد هل نضع قوس فتح ( أم قوس إغلاق )
+        function smartParenthesis() {
+            let openCount = (currentInput.match(/\\(/g) || []).length;
+            let closeCount = (currentInput.match(/\\)/g) || []).length;
+            
+            // إذا كان آخر رمز رقم أو قوس إغلاق، وهناك قوس مفتوح لم يغلق بعد، نضع قوس إغلاق
+            if (openCount > closeCount && (!isNaN(currentInput.slice(-1)) || currentInput.slice(-1) === ')')) {
+                currentInput += ")";
+            } else {
+                currentInput += "(";
+            }
+            updateDisplay(currentInput);
+        }
+
         function clearDisplay() {
             currentInput = "";
             updateDisplay("0");
@@ -139,5 +153,4 @@ calculator_html = """
 </html>
 """
 
-# عرض الحاوية بداخل Streamlit بأبعاد ثابتة ومحكومة تمنع التمدد العشوائي
 components.html(calculator_html, height=550, scrolling=False)
