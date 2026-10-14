@@ -48,6 +48,7 @@ st.markdown("""
 if "expression" not in st.session_state:
     st.session_state.expression = ""
 
+# دوال التحكم بالآلة الحاسبة باستخدام دوال عادية بدلاً من Lambda لتجنب مشاكل التحديث
 def press(char):
     st.session_state.expression += str(char)
 
@@ -70,18 +71,19 @@ def calculate():
 display_text = st.session_state.expression if st.session_state.expression else "0"
 st.markdown(f'<div class="calc-display">{display_text}</div>', unsafe_allow_html=True)
 
-# تقسيم الأزرار إلى صفوف وأعمدة
+# تقسيم الأزرار إلى صفوف وأعمدة مع ربطها بالدوال مباشرة
 buttons = [
-    [("AC", clear), ("(", lambda: press("(")), ("%", lambda: press("%")), ("÷", lambda: press("÷"))],
-    [("7", lambda: press("7")), ("8", lambda: press("8")), ("9", lambda: press("9")), ("×", lambda: press("×"))],
+    [("AC", clear), ("(", lambda: press("(")), ("%", lambda: press("%")), ("÷", lambda: press("/"))],
+    [("7", lambda: press("7")), ("8", lambda: press("8")), ("9", lambda: press("9")), ("×", lambda: press("*"))],
     [("4", lambda: press("4")), ("5", lambda: press("5")), ("6", lambda: press("6")), ("-", lambda: press("-"))],
     [("1", lambda: press("1")), ("2", lambda: press("2")), ("3", lambda: press("3")), ("+", lambda: press("+"))],
     [("0", lambda: press("0")), (".", lambda: press(".")), ("⌫", backspace), ("=", calculate)]
 ]
 
-# رسم الأزرار داخل واجهة Streamlit
-for row in buttons:
+# رسم الأزرار داخل واجهة Streamlit باستخدام ترقيم فريد وصحيح للـ key يمنع حدوث ValueError
+for row_idx, row in enumerate(buttons):
     cols = st.columns(4)
-    for i, (label, action) in enumerate(row):
-        with cols[i]:
-            st.button(label, key=f"btn_{label}_{row.index(row)}_{i}", on_click=action)
+    for col_idx, (label, action) in enumerate(row):
+        with cols[col_idx]:
+            # استخدام row_idx و col_idx يضمن صناعة معرف فريد لكل زر على حدة
+            st.button(label, key=f"btn_r{row_idx}_c{col_idx}", on_click=action)
