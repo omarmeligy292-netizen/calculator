@@ -1,45 +1,58 @@
 import streamlit as st
 
-# إعدادات الصفحة والتصميم المظلم
+# إعدادات الصفحة
 st.set_page_config(page_title="آلة حاسبة مظلمة", layout="centered")
 
-# إضافة كود CSS مخصص لضبط ألوان الأزرار والخلفية لتطابق التصميم المظلم
+# كود CSS المطور لجعل الأزرار مربعة ومتقاربة تماماً مثل الصورة الأصلية
 st.markdown("""
     <style>
-    /* تغيير لون خلفية التطبيق */
+    /* تغيير خلفية التطبيق */
     .stApp {
-        background-color: #0d1117;
+        background-color: #0b0f17;
     }
-    /* تنسيق شاشة العرض */
+    
+    /* شاشة العرض العليا */
     .calc-display {
-        background-color: #0d1117;
+        background-color: #0b0f17;
         color: #ffffff;
-        font-size: 2.5rem;
+        font-size: 3rem;
         text-align: right;
-        padding: 15px;
-        border-radius: 8px;
-        border: 1px solid #21262d;
-        margin-bottom: 20px;
-        font-family: monospace;
+        padding: 25px 20px;
+        border-radius: 12px;
+        border: 1px solid #1f242c;
+        margin-bottom: 15px;
+        font-family: 'Segoe UI', sans-serif;
     }
-    /* تنسيق أزرار الآلة الحاسبة */
+    
+    /* تقليل المسافات العمودية والأفقية بين أعمدة Streamlit ومحاذاتها */
+    [data-testid="column"] {
+        padding: 0px 4px !important;
+    }
+    
+    /* تنسيق الأزرار لجعلها عريضة ومطابقة تماماً للصورة */
     div.stButton > button {
-        background-color: #21262d !important;
+        background-color: #161b22 !important;
         color: #ffffff !important;
         border: none !important;
-        font-size: 1.5rem !important;
-        font-weight: bold !important;
-        padding: 20px 0px !important;
-        width: 100% !important;
+        font-size: 1.4rem !important;
+        font-weight: 600 !important;
+        height: 70px !important; /* طول الزر */
+        width: 100% !important;   /* عرض الزر ليملاً العمود */
         border-radius: 8px !important;
-        transition: background 0.2s;
+        margin: 4px 0px !important;
+        transition: background-color 0.15s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
+    
+    /* تأثير تمرير الفأرة والضغط */
     div.stButton > button:hover {
-        background-color: #30363d !important;
-        color: #ffffff !important;
+        background-color: #21262d !important;
+        border: none !important;
     }
     div.stButton > button:active {
-        background-color: #3f4650 !important;
+        background-color: #30363d !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -48,7 +61,6 @@ st.markdown("""
 if "expression" not in st.session_state:
     st.session_state.expression = ""
 
-# دوال التحكم بالآلة الحاسبة باستخدام دوال عادية بدلاً من Lambda لتجنب مشاكل التحديث
 def press(char):
     st.session_state.expression += str(char)
 
@@ -60,7 +72,6 @@ def backspace():
 
 def calculate():
     try:
-        # استبدال العلامات ليفهمها البايثون أثناء الحساب
         expr = st.session_state.expression.replace('×', '*').replace('÷', '/')
         if expr:
             st.session_state.expression = str(eval(expr))
@@ -71,7 +82,7 @@ def calculate():
 display_text = st.session_state.expression if st.session_state.expression else "0"
 st.markdown(f'<div class="calc-display">{display_text}</div>', unsafe_allow_html=True)
 
-# تقسيم الأزرار إلى صفوف وأعمدة مع ربطها بالدوال مباشرة
+# مصفوفة الأزرار والرموز بنفس الترتيب المطلوب
 buttons = [
     [("AC", clear), ("(", lambda: press("(")), ("%", lambda: press("%")), ("÷", lambda: press("/"))],
     [("7", lambda: press("7")), ("8", lambda: press("8")), ("9", lambda: press("9")), ("×", lambda: press("*"))],
@@ -80,10 +91,9 @@ buttons = [
     [("0", lambda: press("0")), (".", lambda: press(".")), ("⌫", backspace), ("=", calculate)]
 ]
 
-# رسم الأزرار داخل واجهة Streamlit باستخدام ترقيم فريد وصحيح للـ key يمنع حدوث ValueError
+# رسم شبكة الأزرار المتقاربة لحل مشكلة التباعد الطولي
 for row_idx, row in enumerate(buttons):
     cols = st.columns(4)
     for col_idx, (label, action) in enumerate(row):
         with cols[col_idx]:
-            # استخدام row_idx و col_idx يضمن صناعة معرف فريد لكل زر على حدة
             st.button(label, key=f"btn_r{row_idx}_c{col_idx}", on_click=action)
