@@ -1,104 +1,87 @@
-import tkinter as tk
+import streamlit as st
 
-# إنشاء النافذة الرئيسية
-root = tk.Tk()
-root.title("آلة حاسبة")
-root.geometry("360x480")
-root.configure(bg="#0d1117")  # الخلفية الداكنة الخارجية
+# إعدادات الصفحة والتصميم المظلم
+st.set_page_config(page_title="آلة حاسبة مظلمة", layout="centered")
 
-# متغير لتخزين النص الحالي في الحاسبة
-expression = ""
+# إضافة كود CSS مخصص لضبط ألوان الأزرار والخلفية لتطابق التصميم المظلم
+st.markdown("""
+    <style>
+    /* تغيير لون خلفية التطبيق */
+    .stApp {
+        background-color: #0d1117;
+    }
+    /* تنسيق شاشة العرض */
+    .calc-display {
+        background-color: #0d1117;
+        color: #ffffff;
+        font-size: 2.5rem;
+        text-align: right;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #21262d;
+        margin-bottom: 20px;
+        font-family: monospace;
+    }
+    /* تنسيق أزرار الآلة الحاسبة */
+    div.stButton > button {
+        background-color: #21262d !important;
+        color: #ffffff !important;
+        border: none !important;
+        font-size: 1.5rem !important;
+        font-weight: bold !important;
+        padding: 20px 0px !important;
+        width: 100% !important;
+        border-radius: 8px !important;
+        transition: background 0.2s;
+    }
+    div.stButton > button:hover {
+        background-color: #30363d !important;
+        color: #ffffff !important;
+    }
+    div.stButton > button:active {
+        background-color: #3f4650 !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-def press(num):
-    global expression
-    expression += str(num)
-    equation.set(expression)
+# إدارة حالة التطبيق (Session State) لتخزين النص الحالي
+if "expression" not in st.session_state:
+    st.session_state.expression = ""
 
-def equalpress():
-    try:
-        global expression
-        # استبدال الرموز لكي تفهمها لغة بايثون أثناء الحساب
-        total = str(eval(expression.replace('×', '*').replace('÷', '/')))
-        equation.set(total)
-        expression = total
-    except:
-        equation.set(" Error ")
-        expression = ""
+def press(char):
+    st.session_state.expression += str(char)
 
 def clear():
-    global expression
-    expression = ""
-    equation.set("0")
+    st.session_state.expression = ""
 
 def backspace():
-    global expression
-    expression = expression[:-1]
-    if expression == "":
-        equation.set("0")
-    else:
-        equation.set(expression)
+    st.session_state.expression = st.session_state.expression[:-1]
 
-# متغير نصي لتحديث الشاشة ديناميكياً
-equation = tk.StringVar()
-equation.set("0")
+def calculate():
+    try:
+        # استبدال العلامات ليفهمها البايثون أثناء الحساب
+        expr = st.session_state.expression.replace('×', '*').replace('÷', '/')
+        if expr:
+            st.session_state.expression = str(eval(expr))
+    except:
+        st.session_state.expression = "Error"
 
-# شاشة العرض (Display)
-display = tk.Entry(
-    root, 
-    textvariable=equation, 
-    font=('Segoe UI', 24), 
-    bg="#0d1117", 
-    fg="#ffffff", 
-    bd=0, 
-    justify="right"
-)
-display.grid(row=0, column=0, columnspan=4, ipadx=10, ipady=25, padx=20, pady=20, sticky="nsew")
+# عرض الشاشة (إذا كانت فارغة تعرض 0)
+display_text = st.session_state.expression if st.session_state.expression else "0"
+st.markdown(f'<div class="calc-display">{display_text}</div>', unsafe_allow_html=True)
 
-# إعدادات الأزرار (النص، السطر، العمود)
+# تقسيم الأزرار إلى صفوف وأعمدة
 buttons = [
-    ('AC', 1, 0), ('(', 1, 1), ('%', 1, 2), ('÷', 1, 3),
-    ('7', 2, 0),  ('8', 2, 1), ('9', 2, 2), ('×', 2, 3),
-    ('4', 3, 0),  ('5', 3, 1), ('6', 3, 2), ('-', 3, 3),
-    ('1', 4, 0),  ('2', 4, 1), ('3', 4, 2), ('+', 4, 3),
-    ('0', 5, 0),  ('.', 5, 1), ('⌫', 5, 2), ('=', 5, 3)
+    [("AC", clear), ("(", lambda: press("(")), ("%", lambda: press("%")), ("÷", lambda: press("÷"))],
+    [("7", lambda: press("7")), ("8", lambda: press("8")), ("9", lambda: press("9")), ("×", lambda: press("×"))],
+    [("4", lambda: press("4")), ("5", lambda: press("5")), ("6", lambda: press("6")), ("-", lambda: press("-"))],
+    [("1", lambda: press("1")), ("2", lambda: press("2")), ("3", lambda: press("3")), ("+", lambda: press("+"))],
+    [("0", lambda: press("0")), (".", lambda: press(".")), ("⌫", backspace), ("=", calculate)]
 ]
 
-# تنسيق الألوان للأزرار بناءً على نوعها
-for (text, row, col) in buttons:
-    if text == '=':
-        action = equalpress
-    elif text == 'AC':
-        action = clear
-    elif text == '⌫':
-        action = backspace
-    else:
-        action = lambda x=text: press(x)
-        
-    # تحديد ألوان الخلفية والنص بناءً على تصميم الصورة
-    bg_color = "#21262d" # لون الأزرار الافتراضي الداكن
-    fg_color = "#ffffff"
-    
-    # إنشاء الزر وضبط خصائصه
-    btn = tk.Button(
-        root, 
-        text=text, 
-        font=('Segoe UI', 14, 'bold'),
-        bg=bg_color, 
-        fg=fg_color, 
-        activebackground="#30363d", 
-        activeforeground="#ffffff",
-        bd=0, 
-        relief="flat",
-        command=action
-    )
-    btn.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
-
-# ضبط تمدد الصفوف والأعمدة لكي تتناسب الأزرار عند تكبير النافذة
-root.grid_rowconfigure(0, weight=1)
-for i in range(1, 6):
-    root.grid_rowconfigure(i, weight=1)
-for j in range(4):
-    root.grid_columnconfigure(j, weight=1)
-
-# تشغيل البرنامج
-root.mainloop()
+# رسم الأزرار داخل واجهة Streamlit
+for row in buttons:
+    cols = st.columns(4)
+    for i, (label, action) in enumerate(row):
+        with cols[i]:
+            st.button(label, key=f"btn_{label}_{row.index(row)}_{i}", on_click=action)
